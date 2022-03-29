@@ -77,7 +77,7 @@ public class Knn_classifier {
 	        	double prediction = classify(attributes_test);
 	        	predictions_test.add(prediction);
 	        	
-	        	System.out.println("prediction: " + prediction);
+	        	//System.out.println("prediction: " + prediction);
 	        	attributes_test.clear();
 	        	        	
 	        }
@@ -85,10 +85,7 @@ public class Knn_classifier {
 	        sc_test.close();
 	        double correct_prediction = 0;
 	        for(int i=0; i<predictions_actual.size(); i++) {
-//	        	System.out.println("correct predictions: " + predictions_actual.get(i));
-//	    	    System.out.println(" predictions: " + predictions_test.get(i));
-//	    	    double a = predictions_actual.get(i) - predictions_test.get(i);
-//	    	    System.out.println("a: " + a);
+
 	        	if(predictions_actual.get(i) - predictions_test.get(i) == 0.0) {
 	
 	        		correct_prediction ++;
