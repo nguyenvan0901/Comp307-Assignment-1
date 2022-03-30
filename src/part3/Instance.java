@@ -4,9 +4,9 @@ import java.util.ArrayList;
 
 public class Instance {
 	
-	int category = -1;
+	private int category = -1;
 	
-	ArrayList<Double> vals = new ArrayList<>();
+	private ArrayList<Double> vals = new ArrayList<>();
 	public Instance() {
 		
 		// first feature will be 1 for the bias

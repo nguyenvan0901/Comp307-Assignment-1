@@ -3,6 +3,7 @@ package part3;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Scanner;
 
 public class Perceptron {
@@ -56,21 +57,23 @@ public class Perceptron {
 			
 		}
 			
-		// weights for all features and bias
+		//--------------------------initualial set of weights as a list of 0.5s---------------
 		best_weights = new double[numAtts+1];
-		
-		// initualising the weights as a list of 0.5s
+	
 		for(int i=0; i<best_weights.length; i++) {
 			best_weights[i] = 0.5;
 		}	
+		//------------------------------------------------------------------------------------
 		
+		//--------------------------Spliting train set and test set 80/20---------------------
 		ArrayList<Instance> train_set;
 		ArrayList<Instance> test_set;
-		System.out.println(instances.size());
+
 		int portion = instances.size() / 100 * 80;
-		
-		train_set = new ArrayList<> (instances.subList(0, 200));
-		test_set = new ArrayList<> (instances.subList(portion, instances.size()));
+				
+		train_set = new ArrayList<> (instances.subList(0, portion));
+		test_set = new ArrayList<> (instances.subList(portion, instances.size()));		
+		//------------------------------------------------------------------------------------
 
 		System.out.println("Perceptron training and testing the same data.\n ");
 		this.adjustWeights(instances);
@@ -81,6 +84,9 @@ public class Perceptron {
 		this.adjustWeights(train_set);
 		this.predict(test_set);
 		System.out.println("\n ");
+		
+		System.out.println("Perceptron with 5-fold.\n ");
+		this.performKfold();
 				
 	}
 	
@@ -91,24 +97,25 @@ public class Perceptron {
 		double[] weights = new double[best_weights.length];
 		
 		for(int i=0; i<weights.length; i++) {
-			weights[i] = best_weights[i];
+			weights[i] = 0.5;
 		}
 			
 		int iteration = 0;
 		boolean stop_training = false;
 		
-		int best_iteration = 0;
+//		int best_iteration = 0;
 		double best_accuracy =0.0;
 		
 		System.out.println("Start training here.\n");
 		
-		while(iteration < 5000 && stop_training == false) {
+		while(iteration < 10000 && stop_training == false) {
 			
 			for(Instance ins: train_set) {
 				 
 				 double prediction = 1;
 				 double weighted_sum = calculateWeightedSum(ins.getAllFeatures(), weights);
 				 
+				 // if weighted sum < 0 then predict 0 otherwise predict 1
 				 if(weighted_sum < 0) {
 					 prediction = 0;
 				 }
@@ -152,13 +159,16 @@ public class Perceptron {
 					
 				}
 				
-				System.out.println("Current best accuracy: " + best_accuracy);
-				System.out.println("After " + (iteration+1) + " epochs \n");
+//				System.out.println("Current best accuracy on train set: " + best_accuracy);
+//				System.out.println("After " + (iteration+1) + " epochs \n");
 				
 			}
-			
+				
 			iteration ++;
 		}
+		
+		System.out.println("Accuracy on train set: " + best_accuracy);
+		
 		
 		System.out.println("Finish training");
 		
@@ -199,18 +209,60 @@ public class Perceptron {
 	}
 	
 	
-	public void predict(ArrayList<Instance> test_set) {
+	public double predict(ArrayList<Instance> test_set) {
 		int correct_count = 0;
 		
 		double accuracy = getAccuracy(best_weights, test_set);
 		
 		System.out.println("Accuracy on test sett: " + accuracy);
+		return accuracy;
+	}
+	
+	public void performKfold() {
+		
+		double average = 0.0;
+		int test_portion = instances.size() / 100 * 10;
+			
+		for(int i=0; i<10; i++) {
+			System.out.println("FOLD " + (i+1));
+			ArrayList<Instance> test_set = new ArrayList<>();
+			ArrayList<Instance> train_set = new ArrayList<>();
+			train_set.addAll(instances);
+			
+			int start_index = test_portion*i;
+			int end_index = start_index + test_portion;
+
+			for(int j=start_index; j<end_index; j++) {
+				
+				test_set.add(train_set.get(j));
+	
+			}
+			
+			for(int j=start_index; j<end_index; j++) {
+				train_set.remove(start_index);
+				
+				
+	
+			}
+			
+			this.adjustWeights(train_set);
+			double accuracy = this.predict(test_set);
+			average = average + accuracy;
+			
+			System.out.println("\n");
+		}
+		
+		average = average/10;
+		
+		System.out.println("\nAverage accuracy after doing 5-fold cross validate: " + average);
 		
 	}
 
 	public static void main(String[] args) {
-
+		
 		new Perceptron();	
 		
 	}
+	
 }
+

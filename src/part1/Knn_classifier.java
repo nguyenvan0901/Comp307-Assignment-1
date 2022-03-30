@@ -13,12 +13,13 @@ public class Knn_classifier {
 	public final static File test_file  = new File("src/part1/wine-test");
 	public final static File train_file = new File("src/part1/wine-training");
 	
+	
 	private ArrayList<ArrayList<Double>> att_values = new ArrayList<>();
 	
 	private ArrayList<Double> wine_class = new ArrayList<>();	
 	private ArrayList<Double> ranges = new ArrayList<>();
 	
-	private int neighbours = 3;
+	private int neighbours = 8;
 
 
 	
@@ -76,8 +77,8 @@ public class Knn_classifier {
 	        	
 	        	double prediction = classify(attributes_test);
 	        	predictions_test.add(prediction);
-	        	
-	        	//System.out.println("prediction: " + prediction);
+        	
+	        	// clear it so that it can be used for the next instacne 
 	        	attributes_test.clear();
 	        	        	
 	        }
@@ -93,10 +94,10 @@ public class Knn_classifier {
 	        	
 	        }
 	        
-	        double ratio = correct_prediction / predictions_actual.size();
+	        System.out.println("Accuracy for " + neighbours + "-NN: " + correct_prediction/predictions_actual.size());
 	        System.out.println("correct preddictions: " + correct_prediction);
-	        System.out.println("total predictions: " + predictions_actual.size());
-	        System.out.println("ratio: " + correct_prediction/predictions_actual.size());
+	        System.out.println("total predictions: " + predictions_actual.size() + "\n");
+	        
 
         	       
 
@@ -111,6 +112,8 @@ public class Knn_classifier {
 						
 		ArrayList<Double> predictions = new ArrayList<>();
 		ArrayList<Double> distances = new ArrayList<>();
+		
+		// incase a 2 or more observations have the same distance
 		HashMap<Double, ArrayList<Integer>> map = new HashMap<>();
 		
 		
@@ -122,7 +125,7 @@ public class Knn_classifier {
 			for(int j=0; j<13; j++) {
 				distance = distance + Math.pow(attributes.get(j) - att_values.get(j).get(i), 2) / Math.pow(ranges.get(j),2);
 			}
-			//System.out.println("distance: " + distance);
+
 			distances.add(distance);
 			
 			if(!map.keySet().contains(distance)) {
@@ -142,6 +145,7 @@ public class Knn_classifier {
 		
 		for(int i=0; i<neighbours; i++) {
 			
+			// once have gathered enough nearest neighbours
 			if(predictions.size() == neighbours) {
 				break;
 			}
@@ -164,12 +168,10 @@ public class Knn_classifier {
 	
 	
 	public double check_most_frequent(ArrayList<Double> predictions) {
-//		System.out.println("All values:");
-//		for(double a: predictions) {
-//			System.out.println(a);
-//		}
+
 		HashMap<Double, Integer> dictionary = new HashMap<>();
 	
+		// Inputting into the map the prediction and the frequency of that prediction happening.
 		for(double prediction: predictions) {
 			if(!dictionary.keySet().contains(prediction)) {
 				dictionary.put(prediction, 1);
@@ -179,8 +181,9 @@ public class Knn_classifier {
 			}
 		}
 		
+		// Getting all the frequencies to find the prediction that has the highest frequency.
 		Collection<Integer> frequencies = dictionary.values();
-		//System.out.println("size: " + frequencies.size());
+
 		int max = Collections.max(frequencies);
 		double answer = 0;
 		
@@ -189,7 +192,7 @@ public class Knn_classifier {
 				answer = key;
 			}
 		}
-		//System.out.println("answer: " + answer);
+
 		return answer;
 		
 	}
@@ -198,56 +201,3 @@ public class Knn_classifier {
 		new Knn_classifier();
 	}
 }
-
-
-
-/*
-public double classify(ArrayList<Double> attributes) {
-	int total_observations = att_values.get(1).size();
-			
-	PriorityQueue<Double> distances = new PriorityQueue<>();
-	HashMap<Double, ArrayList<Integer>> map = new HashMap<>();
-	
-	for(int i=0; i<total_observations; i++) {
-		
-		double distance = 0;
-		
-		for(int j=0; j<13; j++) {
-			distance = distance + Math.pow(attributes.get(j), 2) / ranges.get(j);
-		}
-		
-		distance = -Math.sqrt(distance);
-		
-		if(!map.keySet().contains(distance)) {
-			
-			map.put(distance, new ArrayList<Integer>(i));
-			
-		}
-		
-		else {
-			
-			map.get(distance).add(i);
-			
-		}
-		
-		// if the distances list is empty, add the fist 3 distances in it.
-		if(distances.size() < neighbours) {
-						
-			distances.add(distance);
-			
-		}
-		
-		else {
-			// if the list already has enough number of neighbours, check if the 
-			// new distance is smaller than the last element in the queue.
-			
-			if(distance > distances.peek()) {
-				
-				distances.poll();
-				distances.add(distance);
-		
-			}
-		}
-		
-	}
-*/
