@@ -10,34 +10,52 @@ import java.util.PriorityQueue;
 import java.util.Scanner;
 
 public class Knn_classifier {
-	public final static File test_file  = new File("src/part1/wine-test");
-	public final static File train_file = new File("src/part1/wine-training");
+//	private File test_file  = new File("src/part1/wine-test");
+//	private File train_file = new File("src/part1/wine-training");
 	
+	private File test_file;
+	private File train_file;
 	
+	// each arraylist is a column of the dataset.
 	private ArrayList<ArrayList<Double>> att_values = new ArrayList<>();
 	
 	private ArrayList<Double> wine_class = new ArrayList<>();	
 	private ArrayList<Double> ranges = new ArrayList<>();
 	
-	private int neighbours = 8;
+	private ArrayList<Integer> neighbours = new ArrayList<>();;
 
-
+	private int number_of_attributes = 0;
 	
-	public Knn_classifier () {
+	public Knn_classifier (String train_file_name, String test_file_name) {
 		
-		for(int i=0; i<13; i++) {
-			
-			att_values.add(new ArrayList<Double>());
-			
-		}
+		train_file = new File(train_file_name);
+		test_file = new File(test_file_name);
 		
+		neighbours.add(1);
+		neighbours.add(3);
+		neighbours.add(5);
+		neighbours.add(7);
+			
+//        ArrayList<Double> prediction_1nn = new ArrayList<>();
 		try {
 			Scanner sc_train = new Scanner(train_file);
 			
-			// Scanning the first line of the file.
-	        sc_train.nextLine();
+			// scanning the first line to see how many attribute there are in the dataset.
+			Scanner s = new Scanner(sc_train.nextLine());
+            
+            while (s.hasNext()) {
+                s.next();
+                number_of_attributes ++;           
+            }
+            
+            number_of_attributes = number_of_attributes - 1;
 	        
-	        
+    		for(int i=0; i<number_of_attributes; i++) {
+    			
+    			att_values.add(new ArrayList<Double>());
+    			
+    		}
+    		
 	        // Start scanning through all the values of each wine object.
 	        while(sc_train.hasNextDouble()) {
 	        	
@@ -57,57 +75,71 @@ public class Knn_classifier {
 	        }
 	        
 	        //------------------------------------------------------------------------------------------------------------
-	        
-	        
-	        Scanner sc_test = new Scanner(test_file);
-	        sc_test.nextLine();
-	        ArrayList<Double> attributes_test = new ArrayList<>();
-	        ArrayList<Double> predictions_test = new ArrayList<>();
-	        ArrayList<Double> predictions_actual = new ArrayList<>();
-	        
-	        while(sc_test.hasNextDouble()) {
+
+	        for(int neighbour: neighbours) {
 	        	
-	        	for(int i=0; i<13; i++) {
-	        		attributes_test.add(sc_test.nextDouble());
-	        	}
+	        	Scanner sc_test = new Scanner(test_file);
+		        sc_test.nextLine();
+		        
+		        // attributes_test contains the features of 1 instance in the test set.
+		        ArrayList<Double> attributes_test = new ArrayList<>();
+		        ArrayList<Double> predictions_test = new ArrayList<>();
+		        ArrayList<Double> predictions_actual = new ArrayList<>();
+	        	while(sc_test.hasNextDouble()) {
+		        	
+		        	for(int i=0; i<13; i++) {
+		        		attributes_test.add(sc_test.nextDouble());
+		        	}
+		        	
+		        	predictions_actual.add(sc_test.nextDouble());
+		        	
+		        	//-----------------------------------------------
+		        	
+		        	double prediction = classify(attributes_test, neighbour);
+		        	predictions_test.add(prediction);
 	        	
-	        	predictions_actual.add(sc_test.nextDouble());
+		        	// clear it so that it can be used for the next instacne 
+		        	attributes_test.clear();
+		        	        	
+		        }
 	        	
-	        	//-----------------------------------------------
-	        	
-	        	double prediction = classify(attributes_test);
-	        	predictions_test.add(prediction);
-        	
-	        	// clear it so that it can be used for the next instacne 
-	        	attributes_test.clear();
-	        	        	
+//	        	if(neighbour == 1) {
+//	        		prediction_1nn.addAll(predictions_test);
+//	        	}
+		        
+		        sc_test.close();
+		        double correct_prediction = 0;
+		        for(int i=0; i<predictions_actual.size(); i++) {
+
+		        	if(predictions_actual.get(i) - predictions_test.get(i) == 0.0) {
+		
+		        		correct_prediction ++;
+		        	}
+		        	
+		        }
+		        
+		        System.out.println("Accuracy for " + neighbour + "-NN: " + correct_prediction/predictions_actual.size());
+		        System.out.println("correct preddictions: " + correct_prediction);
+		        System.out.println("total predictions: " + predictions_actual.size() + "\n");
 	        }
-	        
-	        sc_test.close();
-	        double correct_prediction = 0;
-	        for(int i=0; i<predictions_actual.size(); i++) {
-
-	        	if(predictions_actual.get(i) - predictions_test.get(i) == 0.0) {
-	
-	        		correct_prediction ++;
-	        	}
-	        	
-	        }
-	        
-	        System.out.println("Accuracy for " + neighbours + "-NN: " + correct_prediction/predictions_actual.size());
-	        System.out.println("correct preddictions: " + correct_prediction);
-	        System.out.println("total predictions: " + predictions_actual.size() + "\n");
-	        
-
-        	       
-
+	        	       
 		}catch(IOException e) {
 			System.out.println("Something is wrong");
 		}
-				
+		
+//		String predictions = "";
+		
+//		for(double i: prediction_1nn) {
+//			int a = (int)i;
+//			predictions = predictions + a + ",";
+//		}
+		
+			
+//		System.out.println(predictions);
 	}
 	
-	public double classify(ArrayList<Double> attributes) {
+	public double classify(ArrayList<Double> attributes, int neighbours) {
+		// total obsevation in the training data.
 		int total_observations = att_values.get(1).size();
 						
 		ArrayList<Double> predictions = new ArrayList<>();
@@ -198,6 +230,14 @@ public class Knn_classifier {
 	}
 	
 	public static void main(String[] args) {
-		new Knn_classifier();
+		if(args.length != 2) {
+			new Knn_classifier("src/part1/wine-training", "src/part1/wine-test");
+		}
+		else {
+			String train_file_name = args[0];
+			String test_file_name = args[1];
+		
+			new Knn_classifier(train_file_name, test_file_name);
+		}
 	}
 }

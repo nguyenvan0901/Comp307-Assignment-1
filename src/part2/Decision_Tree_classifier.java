@@ -13,6 +13,7 @@ import part2.DataReader.Instance;
 public class Decision_Tree_classifier {
 	
 	private ArrayList<Instance> instances;
+	private ArrayList<Instance> test_instances;
 	private ArrayList<String> atts;	
 	private ArrayList<String> categories_names;
 	private Node root;
@@ -20,7 +21,9 @@ public class Decision_Tree_classifier {
 	private String majority_category;
 	private double prob_most_frequent;
 	
-	public Decision_Tree_classifier() {
+	public Decision_Tree_classifier(String train_file_name, String test_file_name) {
+		
+		this.initualise();
 		
 		DataReader dr = new DataReader();
 		dr.readDataFile("src/part2/hepatitis-training");
@@ -39,27 +42,24 @@ public class Decision_Tree_classifier {
 		majority_category = entry.getKey();
 			
 		prob_most_frequent = (double)entry.getValue() / (double)instances.size();
-	
 		
 		root = buildTree(instances, copy);
+	
+		//printTree("", root);
 		
 		//System.out.println("\n\n\n");
 		
-		printTree("", root);
-		
-		//System.out.println("\n\n\n");
-		
-		//System.out.println("majority category: '" + majority_category + "' with probability: " + prob_most_frequent);
-
+//		System.out.println("majority category: '" + majority_category + "' with probability: " + prob_most_frequent);
+//		System.out.println("count: " + entry.getValue());
 		// -----------------------------------------------------------------------------------------------------------
 		
 	
 		DataReader dr2 = new DataReader();
-		dr2.readDataFile("src/part2/hepatitis-training");
+		dr2.readDataFile("src/part2/hepatitis-test");
 		//dr2.readDataFile("src/part2/golf-test");
 		
 		
-		ArrayList<Instance>test_instances = (ArrayList<Instance>) dr2.allInstances;
+		test_instances = (ArrayList<Instance>) dr2.allInstances;
 		ArrayList<String> actual_class = new ArrayList<>();
 		ArrayList<String> predict_class = new ArrayList<>();
 		
@@ -74,11 +74,50 @@ public class Decision_Tree_classifier {
 				correct ++;
 			}
 		}
-		
-
-		
+			
 		double accuracy = (double)correct / (double)actual_class.size(); 
 		System.out.println("\n ACCURACY: " + accuracy + " with " + correct + " correct predictions");
+		
+		this.performKFold();
+	}
+	
+	public void initualise() {
+
+		DataReader dr = new DataReader();
+		dr.readDataFile("src/part2/hepatitis-training");
+		//dr.readDataFile("src/part2/golf-training");
+		
+		instances = (ArrayList<Instance>) dr.allInstances;
+		atts = (ArrayList<String>) dr.attNames;
+				
+		HashSet<String> a =  (HashSet<String>) dr.categoryNames;
+		categories_names = new ArrayList<String>(a);
+		ArrayList<String> copy = new ArrayList<>();
+		copy.addAll(atts);
+		
+		Map.Entry<String, Integer> entry = majority_check(instances);
+		
+		majority_category = entry.getKey();
+			
+		prob_most_frequent = (double)entry.getValue() / (double)instances.size();
+		
+		root = buildTree(instances, copy);
+	
+		//printTree("", root);
+		
+		//System.out.println("\n\n\n");
+		
+//		System.out.println("majority category: '" + majority_category + "' with probability: " + prob_most_frequent);
+//		System.out.println("count: " + entry.getValue());
+		// -----------------------------------------------------------------------------------------------------------
+		
+	
+		DataReader dr2 = new DataReader();
+		dr2.readDataFile("src/part2/hepatitis-test");
+		//dr2.readDataFile("src/part2/golf-test");
+		
+		
+		test_instances = (ArrayList<Instance>) dr2.allInstances;
 	}
 	
 	public Node buildTree(ArrayList<Instance> instances, ArrayList<String> attributes) {
@@ -269,10 +308,9 @@ public class Decision_Tree_classifier {
 	
 	public void performKFold() {
 		for(int i=0; i<10; i++) {
-			String test = "src/part2/hepatitis-train-run-" + i;
-			String train = 	"src/part2/hepatitis-test-run-" + i;
-			
-			
+			String train = "src/part2/hepatitis-train-run-" + i;
+			String test  = "src/part2/hepatitis-test-run-" + i;
+		
 		}
 	}
 	
@@ -306,6 +344,14 @@ public class Decision_Tree_classifier {
 	
 	
 	public static void main(String[] args) {
-		new Decision_Tree_classifier();
+		if(args.length != 2) {
+			new Decision_Tree_classifier("src/part2/hepatitis-training", "src/part2/hepatitis-test");
+		}
+		else {
+			String train_file_name = args[0];
+			String test_file_name  = args[1];
+		
+			new Decision_Tree_classifier(train_file_name, test_file_name);
+		}
 	}
 }

@@ -80,13 +80,13 @@ public class Perceptron {
 		this.predict(instances);
 		System.out.println("\n ");
 		
-		System.out.println("Perceptron training and testing on different data.\n ");
-		this.adjustWeights(train_set);
-		this.predict(test_set);
-		System.out.println("\n ");
-		
-		System.out.println("Perceptron with 5-fold.\n ");
-		this.performKfold();
+//		System.out.println("Perceptron training and testing on different data.\n ");
+//		this.adjustWeights(train_set);
+//		this.predict(test_set);
+//		System.out.println("\n ");
+//		
+//		System.out.println("Perceptron with 5-fold.\n ");
+//		this.performKfold();
 				
 	}
 	
@@ -108,7 +108,7 @@ public class Perceptron {
 		
 		System.out.println("Start training here.\n");
 		
-		while(iteration < 10000 && stop_training == false) {
+		while(iteration < 500 && stop_training == false) {
 			
 			for(Instance ins: train_set) {
 				 
@@ -137,6 +137,7 @@ public class Perceptron {
 					 for(int i=0; i<weights.length; i++) {
 						 weights[i] = weights[i] + ins.getAttAt(i);
 					 }
+					 
 				 }
 				 
 			}
@@ -144,6 +145,7 @@ public class Perceptron {
 			double accuracy = getAccuracy(weights, train_set);
 
 			if(accuracy == 1.0) {
+				
 				System.out.println("Achieve 100% accuracy after " + iteration + " epochs");
 				// everything is correct with this weight, stop training.
 				stop_training = true;
@@ -163,7 +165,7 @@ public class Perceptron {
 //				System.out.println("After " + (iteration+1) + " epochs \n");
 				
 			}
-				
+			System.out.println("accuracy: " + accuracy);	
 			iteration ++;
 		}
 		
