@@ -10,8 +10,6 @@ import java.util.PriorityQueue;
 import java.util.Scanner;
 
 public class Knn_classifier {
-//	private File test_file  = new File("src/part1/wine-test");
-//	private File train_file = new File("src/part1/wine-training");
 	
 	private File test_file;
 	private File train_file;
@@ -36,7 +34,7 @@ public class Knn_classifier {
 		neighbours.add(5);
 		neighbours.add(7);
 			
-//        ArrayList<Double> prediction_1nn = new ArrayList<>();
+//       ArrayList<Double> prediction_1nn = new ArrayList<>();
 		try {
 			Scanner sc_train = new Scanner(train_file);
 			
@@ -128,13 +126,13 @@ public class Knn_classifier {
 		}
 		
 //		String predictions = "";
-		
+//		
 //		for(double i: prediction_1nn) {
 //			int a = (int)i;
 //			predictions = predictions + a + ",";
 //		}
-		
-			
+//		
+//			
 //		System.out.println(predictions);
 	}
 	

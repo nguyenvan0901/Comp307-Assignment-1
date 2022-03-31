@@ -1,12 +1,9 @@
 package part2;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Scanner;
 
 import part2.DataReader.Instance;
 
@@ -23,68 +20,21 @@ public class Decision_Tree_classifier {
 	
 	public Decision_Tree_classifier(String train_file_name, String test_file_name) {
 		
-		this.initualise();
+		// initualise all the fields and build a root node for the decision tree
+		this.initualise(train_file_name, test_file_name);
 		
-		DataReader dr = new DataReader();
-		dr.readDataFile("src/part2/hepatitis-training");
-		//dr.readDataFile("src/part2/golf-training");
+		System.out.println("Result from training on 'hepatitis-training' and testing on 'hepatitis-test'");
+		this.performDecisionTree();
 		
-		instances = (ArrayList<Instance>) dr.allInstances;
-		atts = (ArrayList<String>) dr.attNames;
-				
-		HashSet<String> a =  (HashSet<String>) dr.categoryNames;
-		categories_names = new ArrayList<String>(a);
-		ArrayList<String> copy = new ArrayList<>();
-		copy.addAll(atts);
-		
-		Map.Entry<String, Integer> entry = majority_check(instances);
-		
-		majority_category = entry.getKey();
-			
-		prob_most_frequent = (double)entry.getValue() / (double)instances.size();
-		
-		root = buildTree(instances, copy);
-	
-		//printTree("", root);
-		
-		//System.out.println("\n\n\n");
-		
-//		System.out.println("majority category: '" + majority_category + "' with probability: " + prob_most_frequent);
-//		System.out.println("count: " + entry.getValue());
-		// -----------------------------------------------------------------------------------------------------------
-		
-	
-		DataReader dr2 = new DataReader();
-		dr2.readDataFile("src/part2/hepatitis-test");
-		//dr2.readDataFile("src/part2/golf-test");
-		
-		
-		test_instances = (ArrayList<Instance>) dr2.allInstances;
-		ArrayList<String> actual_class = new ArrayList<>();
-		ArrayList<String> predict_class = new ArrayList<>();
-		
-		for(Instance i: test_instances) {		
-			actual_class.add(i.getCategory());
-			predict_class.add(predict(i));
-		}
-		
-		int correct = 0;
-		for(int i=0; i<actual_class.size(); i++) {
-			if(actual_class.get(i).equals(predict_class.get(i))) {
-				correct ++;
-			}
-		}
-			
-		double accuracy = (double)correct / (double)actual_class.size(); 
-		System.out.println("\n ACCURACY: " + accuracy + " with " + correct + " correct predictions");
+		this.printTree("", root);
 		
 		this.performKFold();
 	}
 	
-	public void initualise() {
+	public void initualise(String train_file_name, String test_file_name) {
 
 		DataReader dr = new DataReader();
-		dr.readDataFile("src/part2/hepatitis-training");
+		dr.readDataFile(train_file_name);
 		//dr.readDataFile("src/part2/golf-training");
 		
 		instances = (ArrayList<Instance>) dr.allInstances;
@@ -104,20 +54,13 @@ public class Decision_Tree_classifier {
 		root = buildTree(instances, copy);
 	
 		//printTree("", root);
-		
-		//System.out.println("\n\n\n");
-		
-//		System.out.println("majority category: '" + majority_category + "' with probability: " + prob_most_frequent);
-//		System.out.println("count: " + entry.getValue());
-		// -----------------------------------------------------------------------------------------------------------
-		
-	
+			
 		DataReader dr2 = new DataReader();
-		dr2.readDataFile("src/part2/hepatitis-test");
+		dr2.readDataFile(test_file_name);
 		//dr2.readDataFile("src/part2/golf-test");
-		
-		
+			
 		test_instances = (ArrayList<Instance>) dr2.allInstances;
+		
 	}
 	
 	public Node buildTree(ArrayList<Instance> instances, ArrayList<String> attributes) {
@@ -179,10 +122,6 @@ public class Decision_Tree_classifier {
 				}
 				
 				// -------------------------------calculating the impurity value-------------------------------
-//				if(true_set.isEmpty() || false_set.isEmpty()) {
-//					bestAtt = attribute;
-//					break;
-//				}
 				
 				double true_impurity = calculateImpurity(true_set);	
 				true_impurity = true_impurity * (double)true_set.size() / (double)instances.size();
@@ -267,6 +206,56 @@ public class Decision_Tree_classifier {
 		}
 	}
 	
+	public double performDecisionTree() {
+		ArrayList<String> actual_class = new ArrayList<>();
+		ArrayList<String> predict_class = new ArrayList<>();
+		
+		for(Instance i: test_instances) {		
+			actual_class.add(i.getCategory());
+			predict_class.add(predict(i));
+		}
+		
+		int correct = 0;
+		for(int i=0; i<actual_class.size(); i++) {
+			if(actual_class.get(i).equals(predict_class.get(i))) {
+				correct ++;
+			}
+		}
+			
+		double accuracy = (double)correct / (double)actual_class.size(); 
+		
+		System.out.printf("Accuracy: %.3f with " + correct + " correct predictions\n", accuracy);
+		
+		return accuracy;
+	}
+	
+	
+	
+	public void performKFold() {
+		
+		double average = 0.0;
+		
+		System.out.println("\nResult from 10-Fold Cross Validation hepatitis:");
+		
+		for(int i=0; i<10; i++) {
+			System.out.print("Fold " + (i+1) + " ");
+			String train = "src/part2/hepatitis-training-run-" + i;
+			String test  = "src/part2/hepatitis-test-run-" + i;
+		
+			
+			this.initualise(train, test);
+			double accuracy = this.performDecisionTree();
+			average = average + accuracy;
+		
+		}
+		
+		average = average / 10;
+		
+		System.out.println("Average accuracy: " + average);
+	}
+	
+	
+	//---------------------------------Secondary methods----------------------------------------
 	
 	public Map.Entry<String, Integer> majority_check(ArrayList<Instance> instances){
 		HashMap<String, Integer> catego_occurence = new HashMap<>();
@@ -304,17 +293,7 @@ public class Decision_Tree_classifier {
 
 		return null;
 	}
-	
-	
-	public void performKFold() {
-		for(int i=0; i<10; i++) {
-			String train = "src/part2/hepatitis-train-run-" + i;
-			String test  = "src/part2/hepatitis-test-run-" + i;
 		
-		}
-	}
-	
-	
 	public double calculateImpurity(ArrayList<Instance> instances) {
 		
 		if(instances.isEmpty()) {		
@@ -337,10 +316,10 @@ public class Decision_Tree_classifier {
 		
 		impurity = (double)(cate1_count*cate2_count)/(Math.pow((double)instances.size(),2));
 		
-		return impurity;
-		
-		
+		return impurity;		
 	}
+	
+	//------------------------------------------------------------------------------------------
 	
 	
 	public static void main(String[] args) {
