@@ -5,8 +5,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.HashMap;
 
-import part2.DataReader.Instance;
-
 public class Decision_Tree_classifier {
 	
 	private ArrayList<Instance> instances;
@@ -15,10 +13,16 @@ public class Decision_Tree_classifier {
 	private ArrayList<String> categories_names;
 	private Node root;
 	
+	private String train_file_name;
+	private String test_file_name;
+	
 	private String majority_category;
 	private double prob_most_frequent;
 	
 	public Decision_Tree_classifier(String train_file_name, String test_file_name) {
+		
+		this.train_file_name = train_file_name;
+		this.test_file_name = test_file_name;
 		
 		// initualise all the fields and build a root node for the decision tree
 		this.initualise(train_file_name, test_file_name);
@@ -37,10 +41,10 @@ public class Decision_Tree_classifier {
 		dr.readDataFile(train_file_name);
 		//dr.readDataFile("src/part2/golf-training");
 		
-		instances = (ArrayList<Instance>) dr.allInstances;
-		atts = (ArrayList<String>) dr.attNames;
+		instances = (ArrayList<Instance>) dr.getAllInstances();
+		atts = (ArrayList<String>) dr.getAttNames();
 				
-		HashSet<String> a =  (HashSet<String>) dr.categoryNames;
+		HashSet<String> a =  (HashSet<String>) dr.getCategoryNames();
 		categories_names = new ArrayList<String>(a);
 		ArrayList<String> copy = new ArrayList<>();
 		copy.addAll(atts);
@@ -59,7 +63,7 @@ public class Decision_Tree_classifier {
 		dr2.readDataFile(test_file_name);
 		//dr2.readDataFile("src/part2/golf-test");
 			
-		test_instances = (ArrayList<Instance>) dr2.allInstances;
+		test_instances = (ArrayList<Instance>) dr2.getAllInstances();
 		
 	}
 	
@@ -239,8 +243,8 @@ public class Decision_Tree_classifier {
 		
 		for(int i=0; i<10; i++) {
 			System.out.print("Fold " + (i+1) + " ");
-			String train = "src/part2/hepatitis-training-run-" + i;
-			String test  = "src/part2/hepatitis-test-run-" + i;
+			String train = train_file_name + "-run-" + i;
+			String test  = test_file_name  + "-run-" + i;
 		
 			
 			this.initualise(train, test);

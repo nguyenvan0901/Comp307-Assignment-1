@@ -2,15 +2,18 @@ package part2;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Scanner;
+import java.util.Set;
 
-class DataReader {
-    // some bits of java code that you may use if you wish.
-    int numCategories;
-    int numAtts;
-    Set<String> categoryNames;
-    List<String> attNames;
-    List<Instance> allInstances;
+public class DataReader {
+	private int numCategories;
+    private int numAtts;
+    private Set<String> categoryNames;
+    private List<String> attNames;
+    private List<Instance> allInstances;
 
     public void readDataFile(String fname) {
         /* format of names file:
@@ -36,7 +39,7 @@ class DataReader {
 
             categoryNames = new HashSet<>();
             for (Instance i : allInstances) {
-                categoryNames.add(i.category);
+                categoryNames.add(i.getCategory());
             }
             numCategories = categoryNames.size();
             //System.out.println(numCategories + " categories");
@@ -56,36 +59,24 @@ class DataReader {
         //System.out.println("Read " + instances.size() + " instances");
         return instances;
     }
-
-    public static class Instance {
-
-        private final String category;
-        private final List<Boolean> vals;
-
-        public Instance(String cat, Scanner s) {
-            category = cat;
-            vals = new ArrayList<>();
-            while (s.hasNextBoolean()) {
-                vals.add(s.nextBoolean());
-            }
-        }
-
-        public boolean getAtt(int index) {
-            return vals.get(index);
-        }
-
-        public String getCategory() {
-            return category;
-        }
-
-        public String toString() {
-            StringBuilder ans = new StringBuilder(category);
-            ans.append(" ");
-            for (Boolean val : vals) {
-                ans.append(val ? "true " : "false ");
-            }
-            return ans.toString();
-        }
-
+    
+    public int getNumCategories() {
+    	return numCategories;
+    }
+    
+    public int getNumAtts() {
+    	return numAtts;
+    }
+    
+    public Set<String> getCategoryNames(){
+    	return categoryNames;
+    }
+    
+    public List<String> getAttNames(){
+    	return attNames;
+    }
+    
+    public List<Instance> getAllInstances(){
+    	return allInstances;
     }
 }

@@ -220,7 +220,6 @@ public class Perceptron {
 	
 	
 	public double predict(ArrayList<Instance> test_set) {
-		int correct_count = 0;
 		
 		double accuracy = getAccuracy(best_weights, test_set);
 		
